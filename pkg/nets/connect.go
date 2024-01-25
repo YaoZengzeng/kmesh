@@ -76,10 +76,6 @@ func GrpcConnect(addr string) (*grpc.ClientConn, error) {
 	opts = append(opts, defaultDialOption())
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
-	if !IsIPAndPort(addr) {
-		opts = append(opts, grpc.WithContextDialer(unixDialHandler))
-	}
-
 	if conn, err = grpc.Dial(addr, opts...); err != nil {
 		return nil, err
 	}

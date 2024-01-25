@@ -61,6 +61,21 @@ spec:
            env:
            - name: MESH_CONTROLLER
              value: istio-system:istiod
+           - name: POD_NAME
+             valueFrom:
+               fieldRef:
+                 apiVersion: v1
+                 fieldPath: metadata.namespace
+           - name: POD_NAMESPACE
+             valueFrom:
+               fieldRef:
+                 apiVersion: v1
+                 fieldPath: metadata.namespace
+           - name: INSTANCE_IP
+             valueFrom:
+               fieldRef:
+                 apiVersion: v1
+                 fieldPath: status.podIP
            - name: BPF_LOG_SIZE
              value: "12800"
            volumeMounts:
