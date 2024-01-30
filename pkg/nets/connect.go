@@ -28,7 +28,10 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	istiogrpc "istio.io/istio/pilot/pkg/grpc"
+	istiosecurity "istio.io/istio/pkg/security"
+	"istio.io/istio/security/pkg/credentialfetcher"
+	"istio.io/istio/security/pkg/nodeagent/caclient"
 )
 
 const (
@@ -71,10 +74,27 @@ func GrpcConnect(addr string) (*grpc.ClientConn, error) {
 	var (
 		err  error
 		conn *grpc.ClientConn
-		opts []grpc.DialOption
 	)
-	opts = append(opts, defaultDialOption())
-	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	tlsOptions := &istiogrpc.TLSOptions{
+		RootCert:      "/var/run/secrets/istio/root-cert.pem",
+		ServerAddress: addr,
+	}
+
+	opts, err := istiogrpc.ClientOptions(nil, tlsOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	credFetcherTypeEnv := "JWT"
+	trustDomainEnv := "cluster.local"
+	jwtPath := "/var/run/secrets/tokens/istio-token"
+	credIdentityProvider := "GoogleComputeEngine"
+	credFetcher, err := credentialfetcher.NewCredFetcher(credFetcherTypeEnv, trustDomainEnv, jwtPath, credIdentityProvider)
+	o := &istiosecurity.Options{
+		CredFetcher: credFetcher,
+	}
+	opts = append(opts, grpc.WithPerRPCCredentials(caclient.NewXDSTokenProvider(o)))
 
 	if conn, err = grpc.Dial(addr, opts...); err != nil {
 		return nil, err
