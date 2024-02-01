@@ -40,6 +40,11 @@ const (
 
 	// MaxRetryCount retry max count when reconnect
 	MaxRetryCount = 3
+
+	credFetcherTypeEnv = "JWT"
+	trustDomainEnv     = "cluster.local"
+	jwtPath            = "/var/run/secrets/tokens/istio-token"
+	rootCertPath       = "/var/run/secrets/istio/root-cert.pem"
 )
 
 // IsIPAndPort returns true if the address format ip:port
@@ -77,7 +82,7 @@ func GrpcConnect(addr string) (*grpc.ClientConn, error) {
 	)
 
 	tlsOptions := &istiogrpc.TLSOptions{
-		RootCert:      "/var/run/secrets/istio/root-cert.pem",
+		RootCert:      rootCertPath,
 		ServerAddress: addr,
 	}
 
@@ -86,11 +91,7 @@ func GrpcConnect(addr string) (*grpc.ClientConn, error) {
 		return nil, err
 	}
 
-	credFetcherTypeEnv := "JWT"
-	trustDomainEnv := "cluster.local"
-	jwtPath := "/var/run/secrets/tokens/istio-token"
-	credIdentityProvider := "GoogleComputeEngine"
-	credFetcher, err := credentialfetcher.NewCredFetcher(credFetcherTypeEnv, trustDomainEnv, jwtPath, credIdentityProvider)
+	credFetcher, err := credentialfetcher.NewCredFetcher(credFetcherTypeEnv, trustDomainEnv, jwtPath, "")
 	o := &istiosecurity.Options{
 		CredFetcher: credFetcher,
 	}

@@ -74,6 +74,7 @@ func (c *XdsConfig) Init() error {
 		return nil
 	}
 
+	podIP := env.Register("INSTANCE_IP", "", "").Get()
 	podName := env.Register("POD_NAME", "", "").Get()
 	podNamespace := env.Register("POD_NAMESPACE", "", "").Get()
 	discoveryAddress := env.Register("MESH_CONTROLLER", "istiod.istio-system.svc:15012", "").Get()
@@ -81,10 +82,16 @@ func (c *XdsConfig) Init() error {
 	c.DiscoveryAddress = discoveryAddress
 
 	ip := localHostIPv4
+	if podIP != "" {
+		ip = podIP
+	}
+
 	id := podName + podNamespace
 	dnsDomain := podNamespace + ".svc." + defaultClusterLocalDomain
 
 	c.ServiceNode = strings.Join([]string{nodeRole, ip, id, dnsDomain}, serviceNodeSeparator)
+
+	log.Infof("service node %v connect to discovery address %v", c.ServiceNode, c.DiscoveryAddress)
 
 	return nil
 }
