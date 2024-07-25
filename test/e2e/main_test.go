@@ -74,6 +74,9 @@ type EchoDeployments struct {
 	// The echo service which is enrolled to Kmesh without waypoint.
 	EnrolledToKmesh echo.Instances
 
+	// The echo service which is enrolled to Kmesh and with service waypoint.
+	ServiceWithWaypointAtServiceGranularity echo.Instances
+
 	// WaypointProxies by
 	WaypointProxies map[string]ambient.WaypointProxy
 }
@@ -159,10 +162,18 @@ func SetupApps(t resource.Context, i istio.Instance, apps *EchoDeployments) erro
 				{
 					Replicas: 1,
 					Version:  "v1",
+					Labels: map[string]string{
+						"app": EnrolledToKmesh,
+						"version": "v1"
+					}
 				},
 				{
 					Replicas: 1,
 					Version:  "v2",
+					Labels: map[string]string{
+						"app": EnrolledToKmesh,
+						"version": "v2",
+					}
 				},
 			},
 		})
@@ -176,6 +187,7 @@ func SetupApps(t resource.Context, i istio.Instance, apps *EchoDeployments) erro
 	}
 	apps.All = echos
 	apps.EnrolledToKmesh = match.ServiceName(echo.NamespacedName{Name: EnrolledToKmesh, Namespace: apps.Namespace}).GetMatches(echos)
+	apps.ServiceWithWaypointAtServiceGranularity = match.ServiceName(echo.NamespacedName{Name: ServiceWithWaypointAtServiceGranularity, Namespace: apps.Namespace}).GetMatches(echos)
 
 	if apps.WaypointProxies == nil {
 		apps.WaypointProxies = make(map[string]ambient.WaypointProxy)
