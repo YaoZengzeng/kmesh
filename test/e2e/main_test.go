@@ -98,6 +98,8 @@ const (
 	KmeshDaemonsetName                      = "kmesh"
 	KmeshNamespace                          = "kmesh-system"
 	DataplaneModeKmesh                      = "Kmesh"
+	CustomEchoImage                         = "ghcr.io/yaozengzeng/app:latest"
+	// CustomEchoImage = "gcr.io/istio-testing/app@sha256:84442f740bb5633d0177d0839c5ff299c32eb3dead133585a31b9e361081ca67"
 )
 
 func getDefaultKmeshSrc() string {
@@ -114,19 +116,20 @@ func TestMain(m *testing.M) {
 		NewSuite(m).
 		Setup(func(t resource.Context) error {
 			t.Settings().Ambient = true
+			t.Settings().EchoImage = CustomEchoImage
 			return nil
 		}).
 		Setup(func(t resource.Context) error {
 			return SetupApps(t, i, apps)
-		}).
-		Setup(func(t resource.Context) (err error) {
-			prom, err = prometheus.New(t, prometheus.Config{})
-			if err != nil {
-				return err
-			}
-			return
-		},
-		).
+		}). /*
+			Setup(func(t resource.Context) (err error) {
+				prom, err = prometheus.New(t, prometheus.Config{})
+				if err != nil {
+					return err
+				}
+				return
+			},
+			).*/
 		Run()
 }
 
@@ -330,6 +333,18 @@ func newWaypointProxy(ctx resource.Context, ns namespace.Instance, name string, 
 		return nil, err
 	}
 	pod := pods[0]
+
+	// adjust log level of waypoint to trace.
+	cmd := exec.Command("istioctl", "pc", "log", fmt.Sprintf("%s.%s", pod.Name, pod.Namespace), "--level", "debug")
+
+	output, err := cmd.Output()
+	if err != nil {
+		fmt.Printf("execute istioctl commmand failed: %v", err)
+		return nil, err
+	}
+
+	fmt.Printf(string(output))
+
 	inbound, err := cls.NewPortForwarder(pod.Name, pod.Namespace, "", 0, 15008)
 	if err != nil {
 		return nil, err

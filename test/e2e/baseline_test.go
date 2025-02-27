@@ -695,6 +695,10 @@ func TestAuthorizationL4(t *testing.T) {
 		t.NewSubTest("L4 Authorization").Run(func(t framework.TestContext) {
 			// Enable authorizaiton offload to xdp.
 
+			kmeshctl.AuthzOrFatal(t, "enable")
+			t.Cleanup(func() {
+				kmeshctl.AuthzOrFatal(t, "disable")
+			})
 			if len(apps.ServiceWithWaypointAtServiceGranularity) == 0 {
 				t.Fatal(fmt.Errorf("need at least 1 instance of apps.ServiceWithWaypointAtServiceGranularity"))
 			}
@@ -768,7 +772,7 @@ func TestAuthorizationL4(t *testing.T) {
 						cmd := exec.Command("kubectl", "exec", "-n", namespace, podName, "--", "sh", "-c", "ip a | grep xdp")
 						output, err := cmd.CombinedOutput()
 						if err == nil && len(output) > 0 {
-							t.Logf("XDP program is loaded on pod %s", podName)
+							t.Logf("XDP program is loaded on pod %s, output is %s", podName, output)
 							count++
 							break InnerLoop
 						}
@@ -776,7 +780,7 @@ func TestAuthorizationL4(t *testing.T) {
 					}
 				}
 			}
-
+			time.Sleep(5 * time.Second)
 			for _, tc := range authzCases {
 				t.ConfigIstio().Eval(apps.Namespace.Name(), map[string]string{
 					"Destination": dst.Config().Service,
@@ -796,7 +800,7 @@ spec:
         ipBlocks:
         - "{{.Ip}}"
 `).ApplyOrFail(t)
-
+				time.Sleep(5 * time.Second)
 				for _, client := range clients {
 					opt := echo.CallOptions{
 						To:                      dst,

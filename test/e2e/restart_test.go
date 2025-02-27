@@ -61,6 +61,7 @@ func TestKmeshRestart(t *testing.T) {
 		}).Start()
 
 		restartKmesh(t)
+		//time.Sleep(20 * time.Second)
 
 		g.Stop().CheckSuccessRate(t, 1)
 	})

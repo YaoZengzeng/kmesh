@@ -108,7 +108,7 @@ function setup_istio() {
     kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
         { kubectl kustomize "github.com/kubernetes-sigs/gateway-api/config/crd/experimental?ref=v1.1.0" | kubectl apply -f -; }
 
-    istioctl install --set profile=ambient --set meshConfig.accessLogFile="/dev/stdout" --set components.ingressGateways[0].enabled=true --set components.ingressGateways[0].name=istio-ingressgateway --skip-confirmation
+    istioctl install --set profile=ambient --set meshConfig.accessLogFile="/dev/stdout" --set hub="localhost:5000/istio" --set components.ingressGateways[0].enabled=true --set components.ingressGateways[0].name=istio-ingressgateway --skip-confirmation
 }
 
 function setup_kmesh() {
@@ -143,10 +143,10 @@ function setup_kmesh() {
 
     sleep 10
 
-    for POD in $PODS; do
-        echo $POD
-        kmeshctl log $POD --set bpf:debug
-    done
+    #for POD in $PODS; do
+    #    echo $POD
+    #    kmeshctl log $POD --set bpf:debug
+    #done
 }
 
 export KIND_REGISTRY_NAME="kind-registry"
