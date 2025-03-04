@@ -140,7 +140,7 @@ int cgroup_connect6_prog(struct bpf_sock_addr *ctx)
         return CGROUP_SOCK_OK;
     }
 
-    BPF_LOG(DEBUG, KMESH, "enter cgroup/connect6\n");
+    // BPF_LOG(DEBUG, KMESH, "enter cgroup/connect6\n");
     if (ctx->protocol != IPPROTO_TCP)
         return CGROUP_SOCK_OK;
 

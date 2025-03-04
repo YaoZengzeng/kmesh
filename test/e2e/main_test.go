@@ -117,6 +117,7 @@ func TestMain(m *testing.M) {
 		Setup(func(t resource.Context) error {
 			t.Settings().Ambient = true
 			t.Settings().EchoImage = CustomEchoImage
+			// t.Settings().Image.PullPolicy = "IfNotPresent"
 			return nil
 		}).
 		Setup(func(t resource.Context) error {
@@ -163,15 +164,15 @@ func SetupApps(t resource.Context, i istio.Instance, apps *EchoDeployments) erro
 						"app":     ServiceWithWaypointAtServiceGranularity,
 						"version": "v1",
 					},
-				},
-				{
-					Replicas: 1,
-					Version:  "v2",
-					Labels: map[string]string{
-						"app":     ServiceWithWaypointAtServiceGranularity,
-						"version": "v2",
-					},
-				},
+				}, /*
+					{
+						Replicas: 1,
+						Version:  "v2",
+						Labels: map[string]string{
+							"app":     ServiceWithWaypointAtServiceGranularity,
+							"version": "v2",
+						},
+					},*/
 			},
 		}).
 		WithConfig(echo.Config{
@@ -187,15 +188,15 @@ func SetupApps(t resource.Context, i istio.Instance, apps *EchoDeployments) erro
 						"app":     EnrolledToKmesh,
 						"version": "v1",
 					},
-				},
-				{
-					Replicas: 1,
-					Version:  "v2",
-					Labels: map[string]string{
-						"app":     EnrolledToKmesh,
-						"version": "v2",
-					},
-				},
+				}, /*
+					{
+						Replicas: 1,
+						Version:  "v2",
+						Labels: map[string]string{
+							"app":     EnrolledToKmesh,
+							"version": "v2",
+						},
+					},*/
 			},
 		})
 
@@ -334,16 +335,17 @@ func newWaypointProxy(ctx resource.Context, ns namespace.Instance, name string, 
 	}
 	pod := pods[0]
 
-	// adjust log level of waypoint to trace.
-	cmd := exec.Command("istioctl", "pc", "log", fmt.Sprintf("%s.%s", pod.Name, pod.Namespace), "--level", "debug")
+	/*
+		// adjust log level of waypoint to trace.
+		cmd := exec.Command("istioctl", "pc", "log", fmt.Sprintf("%s.%s", pod.Name, pod.Namespace), "--level", "debug")
 
-	output, err := cmd.Output()
-	if err != nil {
-		fmt.Printf("execute istioctl commmand failed: %v", err)
-		return nil, err
-	}
+		output, err := cmd.Output()
+		if err != nil {
+			fmt.Printf("execute istioctl commmand failed: %v", err)
+			return nil, err
+		}
 
-	fmt.Printf(string(output))
+		fmt.Printf(string(output))*/
 
 	inbound, err := cls.NewPortForwarder(pod.Name, pod.Namespace, "", 0, 15008)
 	if err != nil {

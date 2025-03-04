@@ -143,10 +143,10 @@ function setup_kmesh() {
 
     sleep 10
 
-    #for POD in $PODS; do
-    #    echo $POD
-    #    kmeshctl log $POD --set bpf:debug
-    #done
+    for POD in $PODS; do
+        echo $POD
+        kmeshctl log $POD --set bpf:debug
+    done
 }
 
 export KIND_REGISTRY_NAME="kind-registry"
