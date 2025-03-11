@@ -164,15 +164,15 @@ func SetupApps(t resource.Context, i istio.Instance, apps *EchoDeployments) erro
 						"app":     ServiceWithWaypointAtServiceGranularity,
 						"version": "v1",
 					},
-				}, /*
-					{
-						Replicas: 1,
-						Version:  "v2",
-						Labels: map[string]string{
-							"app":     ServiceWithWaypointAtServiceGranularity,
-							"version": "v2",
-						},
-					},*/
+				},
+				{
+					Replicas: 1,
+					Version:  "v2",
+					Labels: map[string]string{
+						"app":     ServiceWithWaypointAtServiceGranularity,
+						"version": "v2",
+					},
+				},
 			},
 		}).
 		WithConfig(echo.Config{
@@ -188,15 +188,15 @@ func SetupApps(t resource.Context, i istio.Instance, apps *EchoDeployments) erro
 						"app":     EnrolledToKmesh,
 						"version": "v1",
 					},
-				}, /*
-					{
-						Replicas: 1,
-						Version:  "v2",
-						Labels: map[string]string{
-							"app":     EnrolledToKmesh,
-							"version": "v2",
-						},
-					},*/
+				},
+				{
+					Replicas: 1,
+					Version:  "v2",
+					Labels: map[string]string{
+						"app":     EnrolledToKmesh,
+						"version": "v2",
+					},
+				},
 			},
 		})
 

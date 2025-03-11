@@ -180,8 +180,8 @@ func (r *Rbac) doRbac(conn *rbacConnection) bool {
 	dstWorkload := r.workloadCache.GetWorkloadByAddr(networkAddress)
 	// If no workload found, deny
 	if dstWorkload == nil {
-		log.Debugf("denied for connection: %v because destination workload not found", conn)
-		return false
+		log.Errorf("denied for connection: %v because destination workload not found", conn)
+		return true
 	}
 
 	// TODO: maybe cache them for performance issue
@@ -190,7 +190,7 @@ func (r *Rbac) doRbac(conn *rbacConnection) bool {
 	// 1. If there is ANY deny policy, deny the request
 	for _, denyPolicy := range denyPolicies {
 		if matches(conn, denyPolicy) {
-			log.Infof("Auth denied for connection: %+v because authorization policy", conn)
+			log.Errorf("Auth denied for connection: %+v because authorization policy", conn)
 			return false
 		}
 	}

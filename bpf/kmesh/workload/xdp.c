@@ -160,8 +160,10 @@ int xdp_shutdown_in_userspace(struct xdp_md *ctx)
     // never failed
     parser_tuple(&info, &tuple_info);
 
-    if (should_shutdown(&info, &tuple_info) == AUTH_FORBID)
+    if (should_shutdown(&info, &tuple_info) == AUTH_FORBID) {
+        BPF_LOG(ERR, AUTH, "--- SET RST");
         shutdown_tuple(&info);
+    }
 
     // If auth denied, it still returns XDP_PASS here, so next time when a client package is
     // sent to server, it will be shutdown since server's RST has been set

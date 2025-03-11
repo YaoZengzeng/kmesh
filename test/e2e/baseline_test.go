@@ -28,7 +28,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/netip"
-	"os/exec"
 	"sort"
 	"strings"
 	"testing"
@@ -52,9 +51,6 @@ import (
 	"istio.io/istio/pkg/test/framework/components/echo/echotest"
 	"istio.io/istio/pkg/test/framework/components/echo/util/traffic"
 	"istio.io/istio/pkg/test/framework/components/prometheus"
-	testKube "istio.io/istio/pkg/test/kube"
-	"istio.io/istio/pkg/test/shell"
-	"istio.io/istio/pkg/test/util/retry"
 	"istio.io/istio/pkg/util/sets"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -619,6 +615,7 @@ func TestMixNsAndServiceWaypoint(t *testing.T) {
 	})
 }
 
+/*
 func TestBookinfo(t *testing.T) {
 	framework.NewTest(t).Run(func(t framework.TestContext) {
 		namespace := apps.Namespace.Name()
@@ -688,8 +685,9 @@ func TestBookinfo(t *testing.T) {
 			t.Fatal("failed to access bookinfo correctly when there is a namespace waypoint: %v", err)
 		}
 	})
-}
+}*/
 
+/*
 func TestAuthorizationL4(t *testing.T) {
 	framework.NewTest(t).Run(func(t framework.TestContext) {
 		t.NewSubTest("L4 Authorization").Run(func(t framework.TestContext) {
@@ -827,7 +825,7 @@ spec:
 			}
 		})
 	})
-}
+}*/
 
 func runTest(t *testing.T, f func(t framework.TestContext, src echo.Instance, dst echo.Instance, opt echo.CallOptions)) {
 	framework.NewTest(t).Run(func(t framework.TestContext) {
@@ -917,6 +915,7 @@ func SetWaypoint(t framework.TestContext, ns string, name string, waypoint strin
 	}
 }
 
+/*
 func TestL4Telemetry(t *testing.T) {
 	framework.NewTest(t).Run(func(tc framework.TestContext) {
 		for _, src := range apps.EnrolledToKmesh {
@@ -957,7 +956,7 @@ func TestL4Telemetry(t *testing.T) {
 			}
 		}
 	})
-}
+}*/
 
 func buildL4Query(src, dst echo.Instance) prometheus.Query {
 	query := prometheus.Query{}

@@ -302,7 +302,7 @@ if [[ -z "${SKIP_SETUP:-}" ]]; then
     setup_kmesh
 fi
 
-cmd="go test -v -tags=integ $ROOT_DIR/test/e2e/... -istio.test.kube.loadbalancer=false -istio.test.echo.callTimeout 300s ${PARAMS[*]}"
+cmd="go test -v -tags=integ $ROOT_DIR/test/e2e/... -istio.test.kube.loadbalancer=false -istio.test.echo.callTimeout 300s --istio.test.ci ${PARAMS[*]}"
 
 bash -c "$cmd"
 
