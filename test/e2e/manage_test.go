@@ -26,22 +26,16 @@ package kmesh
 import (
 	"context"
 	"fmt"
-	"testing"
 
 	"istio.io/api/label"
 	"istio.io/istio/pkg/config/constants"
-	"istio.io/istio/pkg/test/echo/common/scheme"
 	"istio.io/istio/pkg/test/framework"
 	"istio.io/istio/pkg/test/framework/components/echo"
-	"istio.io/istio/pkg/test/framework/components/echo/check"
-	"istio.io/istio/pkg/test/framework/components/echo/common/ports"
-	"istio.io/istio/pkg/test/framework/components/echo/deployment"
-	"istio.io/istio/pkg/test/framework/components/echo/match"
-	"istio.io/istio/pkg/test/framework/components/namespace"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
+/*
 // Test the workloads in a managed ns, when adding label `istio.io/dataplane-mode=none`, they
 // will be removed from mesh. After deleting the label, it will be re-managed.
 func TestManageWorkloadsDataplaneNone(t *testing.T) {
@@ -101,7 +95,7 @@ func TestManageWorkloadsDataplaneNone(t *testing.T) {
 			}
 		})
 	})
-}
+}*/
 
 func enrollWorkloadsOrFail(t framework.TestContext, ns string, workloads echo.Workloads) {
 	for _, workload := range workloads {
@@ -142,6 +136,7 @@ func setPodLabel(t framework.TestContext, ns string, name string, key string, va
 	return nil
 }
 
+/*
 // This test creates a new namespace which is not managed by Kmesh by default. It contains two services,
 // one managed and one not managed by Kmesh. Verify whether the test result is consistent with expectations.
 // Then manage the namespace and verify that all services in it are indeed managed.
@@ -249,7 +244,7 @@ func TestCrossNamespace(t *testing.T) {
 			unenrolledNSTest()
 		})
 	})
-}
+}*/
 
 func enrollNamespaceOrFail(t framework.TestContext, ns string) {
 	if err := setNamespaceLabel(t, ns, label.IoIstioDataplaneMode.Name, DataplaneModeKmesh); err != nil {

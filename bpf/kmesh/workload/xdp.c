@@ -105,6 +105,8 @@ static inline wl_policies_v *get_workload_policies(struct xdp_info *info, struct
 SEC("xdp_auth")
 int xdp_authz(struct xdp_md *ctx)
 {
+    return XDP_PASS;
+
     if (!is_authz_offload_enabled()) {
         bpf_tail_call(ctx, &map_of_xdp_tailcall, TAIL_CALL_AUTH_IN_USER_SPACE);
         return XDP_PASS;

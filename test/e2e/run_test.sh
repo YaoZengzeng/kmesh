@@ -314,6 +314,25 @@ for i in {1..100}; do
     # 删除前缀为 "echo" 的 k8s namespace
     kubectl get namespaces --no-headers | awk '/^(echo|another)/{print $1}' | xargs -r kubectl delete namespace
 
+    NAMESPACE="kmesh-system"
+    NODE_NAME="kmesh-testing-worker"
+
+    # 获取指定节点上所有 Pods 的名称
+    PODS=$(kubectl get pods -n $NAMESPACE --field-selector spec.nodeName=$NODE_NAME -o jsonpath='{.items[*].metadata.name}')
+
+    # 检查是否找到 Pods
+    if [ -z "$PODS" ]; then
+      echo "No pods found on node $NODE_NAME in namespace $NAMESPACE."
+      exit 1
+    fi
+
+    # 遍历每个 Pod 并输出日志
+    for POD in $PODS; do
+      echo "Logs for Pod: $POD"
+      #kubectl logs -f -n $NAMESPACE $POD >>  kmesh-logs.txt 2>&1 &
+      echo "----------------------------------------"
+    done
+
     # 执行命令，如果失败则跳出循环
     if ! bash -c "$cmd"; then
         echo "Command failed, exiting loop."

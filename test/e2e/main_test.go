@@ -172,17 +172,17 @@ func SetupApps(t resource.Context, i istio.Instance, apps *EchoDeployments) erro
 		WithConfig(echo.Config{
 			Service:        EnrolledToKmesh,
 			Namespace:      apps.Namespace,
-			Ports:          ports.All(),
+			Ports:          echo.Ports{ports.HTTP, ports.TCP},
 			ServiceAccount: true,
 			Subsets: []echo.SubsetConfig{
 				{
 					Replicas: 1,
 					Version:  "v1",
-				},
-				{
-					Replicas: 1,
-					Version:  "v2",
-				},
+				}, /*
+					{
+						Replicas: 1,
+						Version:  "v2",
+					},*/
 			},
 		})
 

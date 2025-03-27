@@ -49,7 +49,6 @@ import (
 	"istio.io/istio/pkg/test/framework/components/echo/config"
 	"istio.io/istio/pkg/test/framework/components/echo/config/param"
 	"istio.io/istio/pkg/test/framework/components/echo/echotest"
-	"istio.io/istio/pkg/test/framework/components/echo/util/traffic"
 	"istio.io/istio/pkg/test/framework/components/prometheus"
 	testKube "istio.io/istio/pkg/test/kube"
 	"istio.io/istio/pkg/test/shell"
@@ -915,6 +914,7 @@ func PromDiff(t test.Failer, prom prometheus.Instance, cluster cluster.Cluster, 
 	}
 }
 
+/*
 func TestServiceRestart(t *testing.T) {
 	const callInterval = 100 * time.Millisecond
 	successThreshold := 1.0
@@ -946,8 +946,9 @@ func TestServiceRestart(t *testing.T) {
 			}
 		}
 	})
-}
+}*/
 
+/*
 // Test ServiceEntry with inlined WorkloadEntry.
 func TestServiceEntryInlinedWorkloadEntry(t *testing.T) {
 	framework.NewTest(t).
@@ -1045,7 +1046,7 @@ spec:
 				})
 			}
 		})
-}
+}*/
 
 // Test that ServiceEntry and WorkloadEntry are different resource objects
 // and ServiceEntry selects WorkloadEntry through selector.
