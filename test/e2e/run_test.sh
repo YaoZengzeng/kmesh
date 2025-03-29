@@ -242,6 +242,12 @@ while (( "$#" )); do
       SKIP_BUILD=true
       shift
     ;;
+    --reset-kmesh-and-tests)
+      SKIP_INSTALL_DEPENDENCIES=true
+      SKIP_SETUP=true
+      SKIP_BUILD=true
+      RESET_KMESH_AND_TESTS=true
+    ;;
     --only-run-tests)
       SKIP_INSTALL_DEPENDENCIES=true
       SKIP_SETUP=true
@@ -292,6 +298,11 @@ if [[ -z "${SKIP_BUILD:-}" ]]; then
     install_kmeshctl
 fi
 
+if [[ -z "${SKIP_BUILD:-}" ]]; then
+  uninstall_kmesh
+  setup_kmesh
+fi
+
 kubectl config use-context "kind-$NAME"
 echo "Running tests in cluster '$NAME'"
 
@@ -329,7 +340,7 @@ for i in {1..100}; do
     # 遍历每个 Pod 并输出日志
     for POD in $PODS; do
       echo "Logs for Pod: $POD"
-      #kubectl logs -f -n $NAMESPACE $POD >>  kmesh-logs.txt 2>&1 &
+      kubectl logs -f -n $NAMESPACE $POD >>  kmesh-logs.txt 2>&1 &
       echo "----------------------------------------"
     done
 

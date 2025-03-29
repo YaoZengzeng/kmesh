@@ -89,8 +89,25 @@ static inline int get_origin_dst(struct sk_msg_md *msg, struct ip_addr *dst_ip, 
     // !dst->ipv4.saddr indicates this is not from waypoint
     // dst->ipv4.sport indicates this connection is already encoded
     // for circumstances above, we just return
-    if (!dst || !dst->ipv4.saddr || dst->ipv4.sport)
+    if (!dst) {
+        BPF_LOG(ERR, SENDMSG, "failed to get dst info from original dst map, dst is nil");
         return -ENOENT;
+    }
+
+    if (!dst->ipv4.saddr) {
+        BPF_LOG(
+            ERR,
+            SENDMSG,
+            "failed to get dst info from original dst map, saddr is nil, sk is %p, tid: %llu",
+            current_sk,
+            bpf_get_current_pid_tgid());
+        return -ENOENT;
+    }
+
+    if (dst->ipv4.sport) {
+        BPF_LOG(ERR, SENDMSG, "failed to get dst info from original dst map, sport is not nil");
+        return -ENOENT;
+    }
 
     if (msg->family == AF_INET) {
         dst_ip->ip4 = dst->ipv4.daddr;

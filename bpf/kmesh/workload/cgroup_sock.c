@@ -66,6 +66,7 @@ static inline int set_original_dst_info(struct kmesh_context *kmesh_ctx)
     if (kmesh_ctx->via_waypoint) {
         // since this field is never used, we use it
         // to indicate whether the request will be handled by waypoint
+        BPF_LOG(ERR, BACKEND, "via_waypoint is true, set saddr to 1: %p, cookie: %llu", sk, bpf_get_socket_cookie(ctx));
         sk_tuple.ipv4.saddr = 1;
     }
 
@@ -77,14 +78,36 @@ static inline int set_original_dst_info(struct kmesh_context *kmesh_ctx)
         sk_tuple.ipv6.dport = ctx->user_port;
     }
 
+    BPF_LOG(
+        ERR,
+        BACKEND,
+        "update original dst map, sk is %p, state: %u, tid: %llu",
+        sk,
+        ctx->sk->state,
+        bpf_get_current_pid_tgid());
     ret = bpf_map_update_elem(&map_of_orig_dst, &(sk), &sk_tuple, BPF_NOEXIST);
     if (ret) {
         // only record the first dst info for each socket
-        if (ret == -EEXIST)
+        if (ret == -EEXIST) {
+            BPF_LOG(
+                ERR,
+                BACKEND,
+                "update original dst map failed, already exist: %p, state: %u, tid: %llu",
+                sk,
+                ctx->sk->state,
+                bpf_get_current_pid_tgid());
             return 0;
+        }
         BPF_LOG(ERR, BACKEND, "record original dst address failed: %d\n", ret);
         return ret;
     }
+    BPF_LOG(
+        ERR,
+        BACKEND,
+        "update original dst map SUCCESS, sk is %p, state: %u, tid: %llu",
+        sk,
+        ctx->sk->state,
+        bpf_get_current_pid_tgid());
     return 0;
 }
 
