@@ -63,6 +63,15 @@ static inline int set_original_dst_info(struct kmesh_context *kmesh_ctx)
     ctx_buff_t *ctx = (ctx_buff_t *)kmesh_ctx->ctx;
     __u64 *sk = (__u64 *)ctx->sk;
 
+    struct bpf_sock *sk2 = (struct bpf_sock *)kmesh_ctx->ctx->sk;
+
+    struct sock_storage_data *storage = NULL;
+    storage = bpf_sk_storage_get(&map_of_sock_storage, sk2, 0, 0);
+    if (!storage) {
+        BPF_LOG(ERR, PROBE, "on close: bpf_sk_storage_get failed\n");
+        return 0;
+    }
+
     if (kmesh_ctx->via_waypoint) {
         // since this field is never used, we use it
         // to indicate whether the request will be handled by waypoint

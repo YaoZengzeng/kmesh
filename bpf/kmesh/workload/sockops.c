@@ -149,6 +149,18 @@ static inline void clean_dstinfo_map(struct bpf_sock_ops *skops)
     int ret = bpf_map_delete_elem(&map_of_orig_dst, &key);
     if (ret && ret != -ENOENT)
         BPF_LOG(ERR, SOCKOPS, "bpf map delete destination info failed, ret: %d", ret);
+
+    struct bpf_sock *sk2 = (struct bpf_sock *)skops->sk;
+    if (!sk2) {
+        return;
+    }
+
+    struct sock_storage_data *storage = NULL;
+    storage = bpf_sk_storage_get(&map_of_sock_storage, sk2, 0, BPF_SK_STORAGE_GET_F_CREATE);
+    if (!storage) {
+        BPF_LOG(ERR, PROBE, "on close: bpf_sk_storage_get failed\n");
+        return;
+    }
 }
 
 // insert an IP tuple into the ringbuf

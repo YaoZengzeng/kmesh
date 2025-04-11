@@ -86,6 +86,15 @@ static inline int get_origin_dst(struct sk_msg_md *msg, struct ip_addr *dst_ip, 
 
     dst = bpf_map_lookup_elem(&map_of_orig_dst, &current_sk);
 
+    struct bpf_sock *sk = (struct bpf_sock *)msg->sk;
+
+    struct sock_storage_data *storage = NULL;
+    storage = bpf_sk_storage_get(&map_of_sock_storage, sk, 0, 0);
+    if (!storage) {
+        BPF_LOG(ERR, PROBE, "on close: bpf_sk_storage_get failed\n");
+        return -ENOENT;
+    }
+
     // !dst->ipv4.saddr indicates this is not from waypoint
     // dst->ipv4.sport indicates this connection is already encoded
     // for circumstances above, we just return

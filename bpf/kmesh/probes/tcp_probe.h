@@ -119,6 +119,13 @@ static inline void construct_orig_dst_info(struct bpf_sock *sk, struct tcp_probe
         return;
     }
 
+    struct sock_storage_data *storage = NULL;
+    storage = bpf_sk_storage_get(&map_of_sock_storage, sk, 0, 0);
+    if (!storage) {
+        BPF_LOG(ERR, PROBE, "on close: bpf_sk_storage_get failed\n");
+        return;
+    }
+
     if (sk->family == AF_INET) {
         info->orig_dst.ipv4.addr = dst->ipv4.daddr;
         info->orig_dst.ipv4.port = bpf_ntohs(dst->ipv4.dport);

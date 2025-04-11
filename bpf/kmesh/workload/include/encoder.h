@@ -6,6 +6,7 @@
 
 #include "config.h"
 #include "common.h"
+#include "bpf_common.h"
 
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);
