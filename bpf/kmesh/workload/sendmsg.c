@@ -103,7 +103,7 @@ static inline int get_origin_dst(struct sk_msg_md *msg, struct ip_addr *dst_ip, 
         return -ENOENT;
     }
 
-    if (!dst->ipv4.saddr) {
+    if (!storage->via_waypoint) {
         BPF_LOG(
             ERR,
             SENDMSG,
@@ -112,18 +112,21 @@ static inline int get_origin_dst(struct sk_msg_md *msg, struct ip_addr *dst_ip, 
             bpf_get_current_pid_tgid());
         return -ENOENT;
     }
+    BPF_LOG(ERR, SENDMSG, "--- storage->via_waypoint is true");
 
-    if (dst->ipv4.sport) {
+    if (storage->has_encoded) {
         BPF_LOG(ERR, SENDMSG, "failed to get dst info from original dst map, sport is not nil");
         return -ENOENT;
     }
 
+    BPF_LOG(ERR, SENDMSG, "--- storage->has_encoded is false");
+
     if (msg->family == AF_INET) {
-        dst_ip->ip4 = dst->ipv4.daddr;
-        *dst_port = dst->ipv4.dport;
+        dst_ip->ip4 = storage->sk_tuple.ipv4.daddr;
+        *dst_port = storage->sk_tuple.ipv4.dport;
     } else {
-        bpf_memcpy(dst_ip->ip6, dst->ipv6.daddr, IPV6_ADDR_LEN);
-        *dst_port = dst->ipv6.dport;
+        bpf_memcpy(dst_ip->ip6, storage->sk_tuple.ipv6.daddr, IPV6_ADDR_LEN);
+        *dst_port = storage->sk_tuple.ipv6.dport;
     }
 
     // since this field is never used, we use it to indicate whether the connection is already encoded
@@ -131,6 +134,8 @@ static inline int get_origin_dst(struct sk_msg_md *msg, struct ip_addr *dst_ip, 
     int ret = bpf_map_update_elem(&map_of_orig_dst, &current_sk, dst, BPF_EXIST);
     if (ret)
         BPF_LOG(ERR, SENDMSG, "update dst info failed, ret: %d\n", ret);
+
+    storage->has_encoded = true;
 
     return 0;
 }

@@ -55,7 +55,12 @@ type KmeshCgroupSockWorkloadSockStorageData struct {
 	ConnectNs      uint64
 	Direction      uint8
 	ConnectSuccess uint8
-	_              [6]byte
+	ViaWaypoint    bool
+	HasEncoded     bool
+	HasSetIp       bool
+	_              [3]byte
+	SkTuple        KmeshCgroupSockWorkloadBpfSockTuple
+	_              [4]byte
 }
 
 // LoadKmeshCgroupSockWorkload returns the embedded CollectionSpec for KmeshCgroupSockWorkload.

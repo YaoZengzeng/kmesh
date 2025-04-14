@@ -57,12 +57,15 @@ func TestKmeshRestart(t *testing.T) {
 			Retry: echo.Retry{NoRetry: true},
 		}
 
+		// time.Sleep(100 * time.Second)
+
 		g := NewGenerator(t, Config{
 			Source:   src,
 			Options:  options,
 			Interval: 5 * time.Millisecond,
 		})
 		g.Start()
+
 		/*
 			for i := 0; i < 1; i++ {
 				select {
@@ -73,7 +76,6 @@ func TestKmeshRestart(t *testing.T) {
 				}
 				restartKmesh(t)
 			}*/
-
 		<-g.stopIter
 
 		g.Stop().CheckSuccessRate(t, 1)

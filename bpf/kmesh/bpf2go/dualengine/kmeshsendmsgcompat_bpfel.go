@@ -41,7 +41,12 @@ type KmeshSendmsgCompatSockStorageData struct {
 	ConnectNs      uint64
 	Direction      uint8
 	ConnectSuccess uint8
-	_              [6]byte
+	ViaWaypoint    bool
+	HasEncoded     bool
+	HasSetIp       bool
+	_              [3]byte
+	SkTuple        KmeshSendmsgCompatBpfSockTuple
+	_              [4]byte
 }
 
 // LoadKmeshSendmsgCompat returns the embedded CollectionSpec for KmeshSendmsgCompat.

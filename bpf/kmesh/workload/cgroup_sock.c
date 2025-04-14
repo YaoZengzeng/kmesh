@@ -66,7 +66,7 @@ static inline int set_original_dst_info(struct kmesh_context *kmesh_ctx)
     struct bpf_sock *sk2 = (struct bpf_sock *)kmesh_ctx->ctx->sk;
 
     struct sock_storage_data *storage = NULL;
-    storage = bpf_sk_storage_get(&map_of_sock_storage, sk2, 0, 0);
+    storage = bpf_sk_storage_get(&map_of_sock_storage, sk2, 0, BPF_LOCAL_STORAGE_GET_F_CREATE);
     if (!storage) {
         BPF_LOG(ERR, PROBE, "on close: bpf_sk_storage_get failed\n");
         return 0;
@@ -75,17 +75,21 @@ static inline int set_original_dst_info(struct kmesh_context *kmesh_ctx)
     if (kmesh_ctx->via_waypoint) {
         // since this field is never used, we use it
         // to indicate whether the request will be handled by waypoint
-        BPF_LOG(ERR, BACKEND, "via_waypoint is true, set saddr to 1: %p, cookie: %llu", sk, bpf_get_socket_cookie(ctx));
-        sk_tuple.ipv4.saddr = 1;
+        BPF_LOG(ERR, BACKEND, "via_waypoint is true, set via_waypoint of sock_storage_data to true: %p", sk2);
+        storage->via_waypoint = true;
     }
 
-    if (ctx->family == AF_INET) {
-        sk_tuple.ipv4.daddr = kmesh_ctx->orig_dst_addr.ip4;
-        sk_tuple.ipv4.dport = ctx->user_port;
-    } else if (ctx->family == AF_INET6) {
-        bpf_memcpy(sk_tuple.ipv6.daddr, kmesh_ctx->orig_dst_addr.ip6, IPV6_ADDR_LEN);
-        sk_tuple.ipv6.dport = ctx->user_port;
+    if (ctx->family == AF_INET && !storage->has_set_ip) {
+        storage->sk_tuple.ipv4.daddr = kmesh_ctx->orig_dst_addr.ip4;
+        storage->sk_tuple.ipv4.dport = ctx->user_port;
+        storage->has_set_ip = true;
+    } else if (ctx->family == AF_INET6 && !storage->has_set_ip) {
+        bpf_memcpy(storage->sk_tuple.ipv6.daddr, kmesh_ctx->orig_dst_addr.ip6, IPV6_ADDR_LEN);
+        storage->sk_tuple.ipv6.dport = ctx->user_port;
+        storage->has_set_ip = true;
     }
+
+    BPF_LOG(ERR, BACKEND, "storage->via_waypoint: %d", storage->via_waypoint);
 
     BPF_LOG(
         ERR,
@@ -98,13 +102,7 @@ static inline int set_original_dst_info(struct kmesh_context *kmesh_ctx)
     if (ret) {
         // only record the first dst info for each socket
         if (ret == -EEXIST) {
-            BPF_LOG(
-                ERR,
-                BACKEND,
-                "update original dst map failed, already exist: %p, state: %u, tid: %llu",
-                sk,
-                ctx->sk->state,
-                bpf_get_current_pid_tgid());
+            BPF_LOG(ERR, BACKEND, "update original dst map failed, already exist: %p", sk);
             return 0;
         }
         BPF_LOG(ERR, BACKEND, "record original dst address failed: %d\n", ret);
