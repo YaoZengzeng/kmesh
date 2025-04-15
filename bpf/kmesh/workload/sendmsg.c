@@ -6,7 +6,7 @@
 #include <bpf/bpf_endian.h>
 #include <bpf/bpf_helpers.h>
 #include "bpf_log.h"
-#include "encoder.h"
+#include "bpf_common.h"
 
 /*
  * sk msg is used to encode metadata into the payload when the client sends
@@ -81,11 +81,6 @@ static inline int check_overflow(struct sk_msg_md *msg, __u8 *begin, __u32 lengt
 
 static inline int get_origin_dst(struct sk_msg_md *msg, struct ip_addr *dst_ip, __u16 *dst_port)
 {
-    __u64 *current_sk = (__u64 *)msg->sk;
-    struct bpf_sock_tuple *dst;
-
-    dst = bpf_map_lookup_elem(&map_of_orig_dst, &current_sk);
-
     struct bpf_sock *sk = (struct bpf_sock *)msg->sk;
 
     struct sock_storage_data *storage = NULL;
@@ -95,20 +90,12 @@ static inline int get_origin_dst(struct sk_msg_md *msg, struct ip_addr *dst_ip, 
         return -ENOENT;
     }
 
-    // !dst->ipv4.saddr indicates this is not from waypoint
-    // dst->ipv4.sport indicates this connection is already encoded
-    // for circumstances above, we just return
-    if (!dst) {
-        BPF_LOG(ERR, SENDMSG, "failed to get dst info from original dst map, dst is nil");
-        return -ENOENT;
-    }
-
     if (!storage->via_waypoint) {
         BPF_LOG(
             ERR,
             SENDMSG,
             "failed to get dst info from original dst map, saddr is nil, sk is %p, tid: %llu",
-            current_sk,
+            sk,
             bpf_get_current_pid_tgid());
         return -ENOENT;
     }
@@ -128,12 +115,6 @@ static inline int get_origin_dst(struct sk_msg_md *msg, struct ip_addr *dst_ip, 
         bpf_memcpy(dst_ip->ip6, storage->sk_tuple.ipv6.daddr, IPV6_ADDR_LEN);
         *dst_port = storage->sk_tuple.ipv6.dport;
     }
-
-    // since this field is never used, we use it to indicate whether the connection is already encoded
-    dst->ipv4.sport = 1;
-    int ret = bpf_map_update_elem(&map_of_orig_dst, &current_sk, dst, BPF_EXIST);
-    if (ret)
-        BPF_LOG(ERR, SENDMSG, "update dst info failed, ret: %d\n", ret);
 
     storage->has_encoded = true;
 

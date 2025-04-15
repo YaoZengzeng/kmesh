@@ -122,7 +122,6 @@ type KmeshCgroupSockWorkloadMapSpecs struct {
 	KmFrontend    *ebpf.MapSpec `ebpf:"km_frontend"`
 	KmLogEvent    *ebpf.MapSpec `ebpf:"km_log_event"`
 	KmManage      *ebpf.MapSpec `ebpf:"km_manage"`
-	KmOrigDst     *ebpf.MapSpec `ebpf:"km_orig_dst"`
 	KmPerfInfo    *ebpf.MapSpec `ebpf:"km_perf_info"`
 	KmPerfMap     *ebpf.MapSpec `ebpf:"km_perf_map"`
 	KmService     *ebpf.MapSpec `ebpf:"km_service"`
@@ -173,7 +172,6 @@ type KmeshCgroupSockWorkloadMaps struct {
 	KmFrontend    *ebpf.Map `ebpf:"km_frontend"`
 	KmLogEvent    *ebpf.Map `ebpf:"km_log_event"`
 	KmManage      *ebpf.Map `ebpf:"km_manage"`
-	KmOrigDst     *ebpf.Map `ebpf:"km_orig_dst"`
 	KmPerfInfo    *ebpf.Map `ebpf:"km_perf_info"`
 	KmPerfMap     *ebpf.Map `ebpf:"km_perf_map"`
 	KmService     *ebpf.Map `ebpf:"km_service"`
@@ -199,7 +197,6 @@ func (m *KmeshCgroupSockWorkloadMaps) Close() error {
 		m.KmFrontend,
 		m.KmLogEvent,
 		m.KmManage,
-		m.KmOrigDst,
 		m.KmPerfInfo,
 		m.KmPerfMap,
 		m.KmService,

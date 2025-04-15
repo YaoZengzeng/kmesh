@@ -58,15 +58,11 @@ static inline int sock_traffic_control(struct kmesh_context *kmesh_ctx)
 
 static inline int set_original_dst_info(struct kmesh_context *kmesh_ctx)
 {
-    int ret;
-    struct bpf_sock_tuple sk_tuple = {0};
+    struct bpf_sock *sk = (struct bpf_sock *)kmesh_ctx->ctx->sk;
     ctx_buff_t *ctx = (ctx_buff_t *)kmesh_ctx->ctx;
-    __u64 *sk = (__u64 *)ctx->sk;
-
-    struct bpf_sock *sk2 = (struct bpf_sock *)kmesh_ctx->ctx->sk;
 
     struct sock_storage_data *storage = NULL;
-    storage = bpf_sk_storage_get(&map_of_sock_storage, sk2, 0, BPF_LOCAL_STORAGE_GET_F_CREATE);
+    storage = bpf_sk_storage_get(&map_of_sock_storage, sk, 0, BPF_LOCAL_STORAGE_GET_F_CREATE);
     if (!storage) {
         BPF_LOG(ERR, PROBE, "on close: bpf_sk_storage_get failed\n");
         return 0;
@@ -75,7 +71,7 @@ static inline int set_original_dst_info(struct kmesh_context *kmesh_ctx)
     if (kmesh_ctx->via_waypoint) {
         // since this field is never used, we use it
         // to indicate whether the request will be handled by waypoint
-        BPF_LOG(ERR, BACKEND, "via_waypoint is true, set via_waypoint of sock_storage_data to true: %p", sk2);
+        BPF_LOG(ERR, BACKEND, "via_waypoint is true, set via_waypoint of sock_storage_data to true: %p", sk);
         storage->via_waypoint = true;
     }
 
@@ -90,31 +86,6 @@ static inline int set_original_dst_info(struct kmesh_context *kmesh_ctx)
     }
 
     BPF_LOG(ERR, BACKEND, "storage->via_waypoint: %d", storage->via_waypoint);
-
-    BPF_LOG(
-        ERR,
-        BACKEND,
-        "update original dst map, sk is %p, state: %u, tid: %llu",
-        sk,
-        ctx->sk->state,
-        bpf_get_current_pid_tgid());
-    ret = bpf_map_update_elem(&map_of_orig_dst, &(sk), &sk_tuple, BPF_NOEXIST);
-    if (ret) {
-        // only record the first dst info for each socket
-        if (ret == -EEXIST) {
-            BPF_LOG(ERR, BACKEND, "update original dst map failed, already exist: %p", sk);
-            return 0;
-        }
-        BPF_LOG(ERR, BACKEND, "record original dst address failed: %d\n", ret);
-        return ret;
-    }
-    BPF_LOG(
-        ERR,
-        BACKEND,
-        "update original dst map SUCCESS, sk is %p, state: %u, tid: %llu",
-        sk,
-        ctx->sk->state,
-        bpf_get_current_pid_tgid());
     return 0;
 }
 

@@ -12,16 +12,6 @@ import (
 	"github.com/cilium/ebpf"
 )
 
-type KmeshSendmsgBpfSockTuple struct {
-	Ipv4 struct {
-		Saddr uint32
-		Daddr uint32
-		Sport uint16
-		Dport uint16
-	}
-	_ [24]byte
-}
-
 type KmeshSendmsgBuf struct{ Data [40]int8 }
 
 type KmeshSendmsgKmeshConfig struct {
@@ -45,8 +35,16 @@ type KmeshSendmsgSockStorageData struct {
 	HasEncoded     bool
 	HasSetIp       bool
 	_              [3]byte
-	SkTuple        KmeshSendmsgBpfSockTuple
-	_              [4]byte
+	SkTuple        struct {
+		Ipv4 struct {
+			Saddr uint32
+			Daddr uint32
+			Sport uint16
+			Dport uint16
+		}
+		_ [24]byte
+	}
+	_ [4]byte
 }
 
 // LoadKmeshSendmsg returns the embedded CollectionSpec for KmeshSendmsg.
@@ -101,7 +99,6 @@ type KmeshSendmsgMapSpecs struct {
 	KmConfigmap   *ebpf.MapSpec `ebpf:"km_configmap"`
 	KmLogEvent    *ebpf.MapSpec `ebpf:"km_log_event"`
 	KmManage      *ebpf.MapSpec `ebpf:"km_manage"`
-	KmOrigDst     *ebpf.MapSpec `ebpf:"km_orig_dst"`
 	KmSockstorage *ebpf.MapSpec `ebpf:"km_sockstorage"`
 	KmTmpbuf      *ebpf.MapSpec `ebpf:"km_tmpbuf"`
 	KmeshMap1600  *ebpf.MapSpec `ebpf:"kmesh_map1600"`
@@ -140,7 +137,6 @@ type KmeshSendmsgMaps struct {
 	KmConfigmap   *ebpf.Map `ebpf:"km_configmap"`
 	KmLogEvent    *ebpf.Map `ebpf:"km_log_event"`
 	KmManage      *ebpf.Map `ebpf:"km_manage"`
-	KmOrigDst     *ebpf.Map `ebpf:"km_orig_dst"`
 	KmSockstorage *ebpf.Map `ebpf:"km_sockstorage"`
 	KmTmpbuf      *ebpf.Map `ebpf:"km_tmpbuf"`
 	KmeshMap1600  *ebpf.Map `ebpf:"kmesh_map1600"`
@@ -154,7 +150,6 @@ func (m *KmeshSendmsgMaps) Close() error {
 		m.KmConfigmap,
 		m.KmLogEvent,
 		m.KmManage,
-		m.KmOrigDst,
 		m.KmSockstorage,
 		m.KmTmpbuf,
 		m.KmeshMap1600,

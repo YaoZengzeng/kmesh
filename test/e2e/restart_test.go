@@ -66,17 +66,15 @@ func TestKmeshRestart(t *testing.T) {
 		})
 		g.Start()
 
-		/*
-			for i := 0; i < 1; i++ {
-				select {
-				case <-g.stopIter:
-					fmt.Printf("-- break restart iterator\n")
-					break
-				default:
-				}
-				restartKmesh(t)
-			}*/
-		<-g.stopIter
+		for i := 0; i < 1; i++ {
+			select {
+			case <-g.stopIter:
+				fmt.Printf("-- break restart iterator\n")
+				break
+			default:
+			}
+			restartKmesh(t)
+		}
 
 		g.Stop().CheckSuccessRate(t, 1)
 	})
